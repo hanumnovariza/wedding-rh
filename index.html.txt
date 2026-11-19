@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Forever Garden — Wedding Planner</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            skyPastel: '#62B4E8',
+            skyDeep: '#3B8AC4',
+            meadow: '#6E9E47',
+            meadowLight: '#8CB865',
+            poppy: '#E86A7A',
+            poppySoft: '#FCEEF3',
+            marigold: '#F2B949',
+            cream: '#FFFDF9',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(180deg, #62B4E8 0%, #B8E1F8 26%, #FDFBF7 58%, #E3F0D4 86%, #C5DFAC 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #2D3748;
+    }
+
+    .font-romantic {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Soft floating clouds & floral card shadow */
+    .garden-card {
+      background: rgba(255, 253, 249, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 30px -5px rgba(59, 138, 196, 0.12), 0 4px 12px -2px rgba(110, 158, 71, 0.08);
+    }
+
+    .sky-hero-gradient {
+      background: linear-gradient(165deg, #54AEE6 0%, #8FD0F5 45%, #EBF7FD 78%, #DDF0CB 100%);
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #9CCAE8;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5CAEE3;
+    }
+
+    /* Masonry layout for moodboard */
+    .masonry-grid {
+      column-count: 1;
+      column-gap: 1.25rem;
+    }
+    @media (min-width: 640px) {
+      .masonry-grid { column-count: 2; }
+    }
+    @media (min-width: 1024px) {
+      .masonry-grid { column-count: 3; }
+    }
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Smooth tab transition */
+    .tab-pane {
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="antialiased pb-16">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-sky-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand / Couple Title -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#62B4E8] to-[#8CB865] flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="flower-2" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-[11px] uppercase tracking-widest font-semibold text-[#3B8AC4] block">Wedding Planner</span>
+          <h1 id="nav-couple-names" class="font-romantic font-bold text-lg text-slate-800 leading-tight">Aisyah &amp; Raka</h1>
+        </div>
+      </div>
+
+      <!-- Backup & Settings Actions -->
+      <div class="flex items-center gap-2">
+        <button onclick="openCoupleModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-[#3B8AC4] text-xs font-semibold transition">
+          <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Atur Pengantin &amp; Tanggal</span>
+        </button>
+        <button onclick="exportData()" title="Simpan Cadangan Data (JSON)" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#6E9E47] text-xs font-semibold transition">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Backup</span>
+        </button>
+        <label title="Muat Data Cadangan (JSON)" class="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#E86A7A] text-xs font-semibold transition">
+          <i data-lucide="upload" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Restore</span>
+          <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="max-w-6xl mx-auto px-4 overflow-x-auto">
+      <div class="flex space-x-1.5 pb-2.5 pt-1 min-w-max">
+        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="nav-tab active flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-[#3B8AC4] text-white shadow-sm">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Dashboard
+        </button>
+        <button onclick="switchTab('budget')" id="tab-btn-budget" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-white/70 text-slate-600 hover:bg-white">
+          <i data-lucide="wallet" class="w-4 h-4 text-[#E86A7A]"></i>
+          Budget Calculator
+        </button>
+        <button onclick="switchTab('guests')" id="tab-btn-guests" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-white/70 text-slate-600 hover:bg-white">
+          <i data-lucide="users" class="w-4 h-4 text-[#3B8AC4]"></i>
+          Guest List
+        </button>
+        <button onclick="switchTab('checklist')" id="tab-btn-checklist" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-white/70 text-slate-600 hover:bg-white">
+          <i data-lucide="check-square" class="w-4 h-4 text-[#6E9E47]"></i>
+          Checklist &amp; Timeline
+        </button>
+        <button onclick="switchTab('moodboard')" id="tab-btn-moodboard" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-white/70 text-slate-600 hover:bg-white">
+          <i data-lucide="palette" class="w-4 h-4 text-[#F2B949]"></i>
+          Moodboard
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-6xl mx-auto px-4 pt-6">
+
+    <!-- ==================== 1. DASHBOARD TAB ==================== -->
+    <section id="pane-dashboard" class="tab-pane space-y-6">
+      <!-- Whimsical Sky-to-Meadow Hero Banner -->
+      <div class="sky-hero-gradient rounded-3xl p-6 md:p-8 shadow-lg border-2 border-white relative overflow-hidden">
+        <!-- Decorative SVG Clouds & Garden Flowers -->
+        <svg class="absolute top-3 right-6 w-32 h-16 text-white/60 pointer-events-none" viewBox="0 0 200 100" fill="currentColor">
+          <path d="M45,75 C25,75 15,60 22,45 C25,30 42,22 58,28 C68,12 95,10 112,24 C128,18 150,26 155,44 C172,46 182,62 172,75 Z"/>
+        </svg>
+        <svg class="absolute top-12 left-8 w-24 h-12 text-white/40 pointer-events-none" viewBox="0 0 200 100" fill="currentColor">
+          <path d="M45,75 C25,75 15,60 22,45 C25,30 42,22 58,28 C68,12 95,10 112,24 C128,18 150,26 155,44 C172,46 182,62 172,75 Z"/>
+        </svg>
+
+        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <!-- Left: Custom Cover Illustration / Photo -->
+          <div class="lg:col-span-4 flex flex-col items-center">
+            <div class="relative group w-48 h-56 sm:w-52 sm:h-60 rounded-3xl overflow-hidden border-4 border-white shadow-md bg-gradient-to-b from-[#62B4E8] via-[#B8E1F8] to-[#7DAE52]">
+              <img id="hero-cover-img" src="" alt="Foto Cover Pengantin" class="w-full h-full object-cover hidden" />
+              <!-- Default Whimsical Garden Couple SVG Illustration matching uploaded aesthetic -->
+              <div id="hero-default-svg" class="w-full h-full flex flex-col justify-between p-3 relative">
+                <div class="flex justify-between items-start">
+                  <span class="w-2 h-2 rounded-full bg-white/80"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-white/70"></span>
+                  <span class="w-2 h-2 rounded-full bg-white/80"></span>
+                </div>
+                <svg viewBox="0 0 200 210" class="w-full h-full">
+                  <!-- Soft Cloud -->
+                  <path d="M20,115 Q35,85 65,95 Q90,70 125,90 Q155,80 175,115 Z" fill="#FFFFFF" opacity="0.85"/>
+                  <!-- Meadow Hill -->
+                  <path d="M0,145 Q100,120 200,145 L200,210 L0,210 Z" fill="#6E9E47"/>
+                  <path d="M0,160 Q100,140 200,160 L200,210 L0,210 Z" fill="#8CB865"/>
+                  <!-- Groom & Bride Whimsical Silhouettes -->
+                  <g transform="translate(52, 58)">
+                    <!-- Groom -->
+                    <rect x="44" y="45" width="32" height="48" rx="14" fill="#FFFFFF"/>
+                    <circle cx="60" cy="30" r="16" fill="#FDE2D2"/>
+                    <path d="M44,26 Q60,10 76,26 Q72,16 60,18 Q48,16 44,26 Z" fill="#4A3B32"/>
+                    <!-- Bride -->
+                    <path d="M12,35 Q30,8 48,35 L54,88 L6,88 Z" fill="#FFFFFF"/>
+                    <path d="M12,35 Q30,8 48,35 Q45,55 48,75" fill="none" stroke="#F49AC1" stroke-width="2" stroke-dasharray="3,3"/>
+                    <circle cx="30" cy="34" r="14" fill="#FDE2D2"/>
+                    <!-- Blush -->
+                    <circle cx="23" cy="37" r="2.5" fill="#F49AC1"/>
+                    <circle cx="37" cy="37" r="2.5" fill="#F49AC1"/>
+                    <!-- Sarong Pastel -->
+                    <rect x="14" y="64" width="34" height="24" rx="6" fill="#F7D6E6"/>
+                  </g>
+                  <!-- Cute Cat -->
+                  <g transform="translate(124, 132)">
+                    <ellipse cx="14" cy="14" rx="10" ry="8" fill="#FFFFFF"/>
+                    <circle cx="14" cy="6" r="7" fill="#333333"/>
+                    <polygon points="8,2 10,-4 13,1" fill="#333333"/>
+                    <polygon points="20,2 18,-4 15,1" fill="#333333"/>
+                  </g>
+                  <!-- Poppy & Marigold Flowers -->
+                  <circle cx="28" cy="175" r="9" fill="#E86A7A"/>
+                  <circle cx="28" cy="175" r="3" fill="#F2B949"/>
+                  <circle cx="62" cy="186" r="8" fill="#F2B949"/>
+                  <circle cx="142" cy="182" r="10" fill="#E86A7A"/>
+                  <circle cx="142" cy="182" r="3.5" fill="#5D3A1A"/>
+                  <circle cx="174" cy="172" r="7" fill="#F49AC1"/>
+                  <circle cx="105" cy="190" r="6" fill="#62B4E8"/>
+                </svg>
+              </div>
+
+              <!-- Hover Upload Cover Button -->
+              <label class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white cursor-pointer text-xs font-semibold gap-1.5 p-3 text-center">
+                <i data-lucide="camera" class="w-6 h-6"></i>
+                <span>Ganti Foto Cover</span>
+                <input type="file" accept="image/*" class="hidden" onchange="uploadHeroCover(event)" />
+              </label>
+            </div>
+            <button id="reset-cover-btn" onclick="resetHeroCover()" class="hidden mt-2 text-xs text-slate-600 hover:text-[#E86A7A] underline">
+              Kembalikan ilustrasi bawaan
+            </button>
+          </div>
+
+          <!-- Right: Couple Names, Date & Live Countdown -->
+          <div class="lg:col-span-8 text-center lg:text-left space-y-4">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 text-[#3B8AC4] text-xs font-bold shadow-sm">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#F2B949]"></i>
+              <span>Menuju Hari Bahagia Kita</span>
+            </div>
+
+            <div>
+              <h2 id="hero-couple-names" onclick="openCoupleModal()" title="Klik untuk ubah nama pengantin" class="font-romantic text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 cursor-pointer hover:text-[#3B8AC4] transition inline-flex items-center gap-2">
+                Aisyah &amp; Raka
+              </h2>
+              <p id="hero-wedding-date-text" onclick="openCoupleModal()" class="text-slate-700 font-medium mt-1.5 flex items-center justify-center lg:justify-start gap-2 cursor-pointer hover:text-[#E86A7A] transition">
+                <i data-lucide="calendar-heart" class="w-4 h-4 text-[#E86A7A]"></i>
+                <span>Sabtu, 12 Desember 2026 • Pukul 08:00 WIB</span>
+              </p>
+              <p id="hero-venue-text" class="text-xs sm:text-sm text-slate-600 mt-1 flex items-center justify-center lg:justify-start gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#6E9E47]"></i>
+                <span>Taman Bunga Nusantara / Gedung Serbaguna</span>
+              </p>
+            </div>
+
+            <!-- Live Countdown Boxes -->
+            <div class="grid grid-cols-4 gap-2.5 sm:gap-4 max-w-lg mx-auto lg:mx-0 pt-2">
+              <div class="bg-white/90 backdrop-blur rounded-2xl p-3 sm:p-4 text-center shadow-sm border border-sky-100">
+                <span id="cd-days" class="block font-romantic text-2xl sm:text-4xl font-bold text-[#3B8AC4]">0</span>
+                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Hari</span>
+              </div>
+              <div class="bg-white/90 backdrop-blur rounded-2xl p-3 sm:p-4 text-center shadow-sm border border-sky-100">
+                <span id="cd-hours" class="block font-romantic text-2xl sm:text-4xl font-bold text-[#E86A7A]">0</span>
+                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Jam</span>
+              </div>
+              <div class="bg-white/90 backdrop-blur rounded-2xl p-3 sm:p-4 text-center shadow-sm border border-sky-100">
+                <span id="cd-minutes" class="block font-romantic text-2xl sm:text-4xl font-bold text-[#6E9E47]">0</span>
+                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Menit</span>
+              </div>
+              <div class="bg-white/90 backdrop-blur rounded-2xl p-3 sm:p-4 text-center shadow-sm border border-sky-100">
+                <span id="cd-seconds" class="block font-romantic text-2xl sm:text-4xl font-bold text-[#F2B949]">0</span>
+                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Detik</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 KPI Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Budget Card -->
+        <div onclick="switchTab('budget')" class="garden-card rounded-3xl p-5 cursor-pointer hover:-translate-y-1 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Anggaran</span>
+            <div class="w-9 h-9 rounded-2xl bg-rose-50 text-[#E86A7A] flex items-center justify-center">
+              <i data-lucide="wallet" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="dash-budget-total" class="text-xl font-bold text-slate-800">Rp 0</p>
+          <p id="dash-budget-sub" class="text-xs text-[#6E9E47] font-medium mt-1">Lunas: Rp 0</p>
+        </div>
+
+        <!-- Guests Card -->
+        <div onclick="switchTab('guests')" class="garden-card rounded-3xl p-5 cursor-pointer hover:-translate-y-1 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Daftar Tamu</span>
+            <div class="w-9 h-9 rounded-2xl bg-sky-50 text-[#3B8AC4] flex items-center justify-center">
+              <i data-lucide="users" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="dash-guest-total" class="text-xl font-bold text-slate-800">0 Tamu</p>
+          <p id="dash-guest-sub" class="text-xs text-[#3B8AC4] font-medium mt-1">0 Konfirmasi Hadir</p>
+        </div>
+
+        <!-- Checklist Card -->
+        <div onclick="switchTab('checklist')" class="garden-card rounded-3xl p-5 cursor-pointer hover:-translate-y-1 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Progres Persiapan</span>
+            <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-[#6E9E47] flex items-center justify-center">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="dash-task-percent" class="text-xl font-bold text-slate-800">0%</p>
+          <div class="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden">
+            <div id="dash-task-bar" class="bg-[#6E9E47] h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Moodboard Card -->
+        <div onclick="switchTab('moodboard')" class="garden-card rounded-3xl p-5 cursor-pointer hover:-translate-y-1 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Koleksi Moodboard</span>
+            <div class="w-9 h-9 rounded-2xl bg-amber-50 text-[#F2B949] flex items-center justify-center">
+              <i data-lucide="image" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="dash-mood-total" class="text-xl font-bold text-slate-800">0 Koleksi</p>
+          <p id="dash-mood-sub" class="text-xs text-slate-500 font-medium mt-1">0 Inspirasi tersimpan</p>
+        </div>
+      </div>
+
+      <!-- Shared Couple Love Notes -->
+      <div class="garden-card rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-romantic text-xl font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="heart" class="w-5 h-5 text-[#E86A7A] fill-[#E86A7A]"></i>
+            Catatan &amp; Pengingat Berdua
+          </h3>
+          <span class="text-xs text-slate-400">Tersimpan otomatis</span>
+        </div>
+        <textarea id="couple-notes" rows="3" oninput="saveNotes(this.value)" placeholder="Tulis pesan manis, pengingat jadwal fitting baju, atau hal penting untuk pasanganmu di sini..." class="w-full rounded-2xl border border-sky-100 bg-white/80 p-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#62B4E8]"></textarea>
+      </div>
+    </section>
+
+    <!-- ==================== 2. BUDGET CALCULATOR TAB ==================== -->
+    <section id="pane-budget" class="tab-pane hidden space-y-6">
+      <!-- Top Budget Summary & Add Category -->
+      <div class="garden-card rounded-3xl p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div>
+            <h2 class="font-romantic text-2xl font-bold text-slate-800">Budget Calculator Pernikahan</h2>
+            <p class="text-sm text-slate-500">Ubah judul tiap part/kategori kapan saja, tambah item, dan pantau status pembayaran.</p>
+          </div>
+          <button onclick="addBudgetCategory()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-[#E86A7A] hover:bg-[#d85869] text-white font-semibold text-sm shadow-sm transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            Tambah Part / Kategori Baru
+          </button>
+        </div>
+
+        <!-- Budget Totals Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
+          <div class="rounded-2xl bg-sky-50/80 p-4 border border-sky-100">
+            <span class="text-xs font-semibold text-[#3B8AC4] uppercase">Total Keseluruhan</span>
+            <p id="budget-grand-total" class="text-xl sm:text-2xl font-bold text-slate-800 mt-1">Rp 0</p>
+          </div>
+          <div class="rounded-2xl bg-emerald-50/80 p-4 border border-emerald-100">
+            <span class="text-xs font-semibold text-[#6E9E47] uppercase">Sudah Lunas</span>
+            <p id="budget-paid-total" class="text-xl sm:text-2xl font-bold text-[#6E9E47] mt-1">Rp 0</p>
+          </div>
+          <div class="rounded-2xl bg-amber-50/80 p-4 border border-amber-100">
+            <span class="text-xs font-semibold text-amber-600 uppercase">Sisa (Booking &amp; DP)</span>
+            <p id="budget-pending-total" class="text-xl sm:text-2xl font-bold text-amber-600 mt-1">Rp 0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Budget Categories Container -->
+      <div id="budget-categories-container" class="space-y-6"></div>
+    </section>
+
+    <!-- ==================== 3. GUEST LIST TAB ==================== -->
+    <section id="pane-guests" class="tab-pane hidden space-y-6">
+      <div class="garden-card rounded-3xl p-6 space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-romantic text-2xl font-bold text-slate-800">Guest List (Buku Tamu)</h2>
+            <p class="text-sm text-slate-500">Kelola daftar undangan cetak maupun digital serta pantau konfirmasi kehadiran.</p>
+          </div>
+          <!-- Mini Stats Pills -->
+          <div class="flex flex-wrap gap-2 text-xs font-semibold">
+            <span id="guest-stat-total" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700">Total: 0</span>
+            <span id="guest-stat-cetak" class="px-3 py-1.5 rounded-xl bg-sky-50 text-[#3B8AC4]">Cetak: 0</span>
+            <span id="guest-stat-digital" class="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-600">Digital: 0</span>
+            <span id="guest-stat-hadir" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-[#6E9E47]">Hadir: 0</span>
+            <span id="guest-stat-tidak" class="px-3 py-1.5 rounded-xl bg-rose-50 text-[#E86A7A]">Tidak: 0</span>
+          </div>
+        </div>
+
+        <!-- Quick Add Guest Form -->
+        <form onsubmit="addGuest(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-sky-50/60 p-4 rounded-2xl border border-sky-100">
+          <div class="sm:col-span-4">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nama Tamu</label>
+            <input type="text" id="new-guest-name" required placeholder="Contoh: Kel. Bpk. Hendra" class="w-full px-3.5 py-2 rounded-xl border border-sky-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#62B4E8]" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Undangan</label>
+            <select id="new-guest-type" class="w-full px-3 py-2 rounded-xl border border-sky-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#62B4E8]">
+              <option value="Digital">Digital</option>
+              <option value="Cetak">Cetak</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status</label>
+            <select id="new-guest-status" class="w-full px-3 py-2 rounded-xl border border-sky-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#62B4E8]">
+              <option value="Belum Diundang">Belum Diundang</option>
+              <option value="Sudah Diundang">Sudah Diundang</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3 flex items-end">
+            <button type="submit" class="w-full py-2 px-4 rounded-xl bg-[#3B8AC4] hover:bg-[#2f75a8] text-white font-semibold text-sm flex items-center justify-center gap-1.5 transition shadow-sm">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+              Tambah Tamu
+            </button>
+          </div>
+        </form>
+
+        <!-- Search & Filter Bar -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+            <input type="text" id="guest-search" oninput="renderGuests()" placeholder="Cari nama tamu..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#62B4E8]" />
+          </div>
+          <select id="guest-filter-type" onchange="renderGuests()" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-600">
+            <option value="ALL">Semua Undangan</option>
+            <option value="Cetak">Undangan Cetak</option>
+            <option value="Digital">Undangan Digital</option>
+          </select>
+          <select id="guest-filter-status" onchange="renderGuests()" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-600">
+            <option value="ALL">Semua Status</option>
+            <option value="Belum Diundang">Belum Diundang</option>
+            <option value="Sudah Diundang">Sudah Diundang</option>
+          </select>
+          <select id="guest-filter-rsvp" onchange="renderGuests()" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-600">
+            <option value="ALL">Semua Kehadiran</option>
+            <option value="Hadir">Hadir</option>
+            <option value="Tidak">Tidak</option>
+            <option value="Belum Konfirmasi">Belum Konfirmasi</option>
+          </select>
+        </div>
+
+        <!-- Simple Guest Table -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-sky-50/90 text-slate-700 text-xs uppercase tracking-wider border-b border-slate-200">
+                <th class="py-3.5 px-4 w-14 text-center">No</th>
+                <th class="py-3.5 px-4">Nama</th>
+                <th class="py-3.5 px-4 w-36">Undangan</th>
+                <th class="py-3.5 px-4 w-44">Status</th>
+                <th class="py-3.5 px-4 w-40">Kehadiran</th>
+                <th class="py-3.5 px-4 w-20 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="guest-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. CHECKLIST & TIMELINE TAB ==================== -->
+    <section id="pane-checklist" class="tab-pane hidden space-y-6">
+      <div class="garden-card rounded-3xl p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-romantic text-2xl font-bold text-slate-800">Checklist &amp; Timeline Persiapan (H-12 Bulan)</h2>
+            <p class="text-sm text-slate-500">Sesuaikan fase waktu, tambah tugas baru, atau ubah daftar tugas kapan saja.</p>
+          </div>
+          <button onclick="addTimelinePhase()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-[#6E9E47] hover:bg-[#5c873a] text-white font-semibold text-sm shadow-sm transition">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+            Tambah Fase Waktu
+          </button>
+        </div>
+
+        <!-- Overall Progress Bar -->
+        <div class="mt-5 bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100">
+          <div class="flex justify-between text-sm font-semibold mb-1.5">
+            <span class="text-slate-700">Total Progres Persiapan Pernikahan</span>
+            <span id="checklist-progress-text" class="text-[#6E9E47]">0 / 0 Tugas Selesai (0%)</span>
+          </div>
+          <div class="w-full bg-white rounded-full h-3 overflow-hidden border border-emerald-200">
+            <div id="checklist-progress-bar" class="bg-gradient-to-r from-[#6E9E47] to-[#8CB865] h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Phases List -->
+      <div id="timeline-phases-container" class="space-y-5"></div>
+    </section>
+
+    <!-- ==================== 5. MOODBOARD TAB ==================== -->
+    <section id="pane-moodboard" class="tab-pane hidden space-y-6">
+      <div class="garden-card rounded-3xl p-6 space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-romantic text-2xl font-bold text-slate-800">Moodboard &amp; Koleksi Inspirasi</h2>
+            <p class="text-sm text-slate-500">Kelompokkan inspirasi dekorasi, gaun, palet warna, hingga foto prewedding.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="addMoodboardCollection()" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-sky-50 hover:bg-sky-100 text-[#3B8AC4] font-semibold text-sm transition">
+              <i data-lucide="folder-plus" class="w-4 h-4"></i>
+              Koleksi Baru
+            </button>
+            <button onclick="openAddMoodItemModal()" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#E86A7A] hover:bg-[#d85869] text-white font-semibold text-sm shadow-sm transition">
+              <i data-lucide="image-plus" class="w-4 h-4"></i>
+              Tambah Inspirasi
+            </button>
+          </div>
+        </div>
+
+        <!-- Collection Filter Tabs -->
+        <div id="moodboard-collections-tabs" class="flex flex-wrap items-center gap-2 pt-1"></div>
+
+        <!-- Active Collection Header (Rename / Delete Collection) -->
+        <div id="active-collection-bar" class="flex flex-wrap items-center justify-between gap-3 bg-rose-50/60 px-4 py-3 rounded-2xl border border-rose-100">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-[#E86A7A]"></i>
+            <span id="active-collection-title" class="font-bold text-slate-800 text-base">Moodboard Dekor</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="renameActiveCollection()" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 flex items-center gap-1">
+              <i data-lucide="pencil" class="w-3.5 h-3.5"></i> Ubah Nama Koleksi
+            </button>
+            <button onclick="deleteActiveCollection()" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-[#E86A7A] border border-rose-200 flex items-center gap-1">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Hapus Koleksi
+            </button>
+          </div>
+        </div>
+
+        <!-- Masonry Gallery -->
+        <div id="moodboard-gallery" class="masonry-grid pt-2"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Couple Settings Modal -->
+  <div id="couple-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-sky-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-romantic text-xl font-bold text-slate-800">Detail Calon Pengantin</h3>
+        <button onclick="closeModal('couple-modal')" class="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nama Calon Pengantin Wanita</label>
+          <input type="text" id="input-bride" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#62B4E8] focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nama Calon Pengantin Pria</label>
+          <input type="text" id="input-groom" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#62B4E8] focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Tanggal &amp; Jam Akad / Resepsi</label>
+          <input type="datetime-local" id="input-wedding-date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#62B4E8] focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Lokasi / Venue Pernikahan</label>
+          <input type="text" id="input-venue" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#62B4E8] focus:outline-none" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('couple-modal')" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-500 hover:bg-slate-100">Batal</button>
+        <button onclick="saveCoupleSettings()" class="px-5 py-2 rounded-xl text-sm font-semibold bg-[#3B8AC4] hover:bg-[#2f75a8] text-white shadow-sm">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Add Moodboard Item Modal -->
+  <div id="mood-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-romantic text-xl font-bold text-slate-800">Tambah Inspirasi Moodboard</h3>
+        <button onclick="closeModal('mood-modal')" class="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="saveMoodItem(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Pilih Koleksi</label>
+          <select id="mood-item-collection" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Judul / Konsep Inspirasi</label>
+          <input type="text" id="mood-item-title" required placeholder="Contoh: Pelaminan Taman Bunga Pastel" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Upload Gambar dari Perangkat</label>
+          <input type="file" id="mood-item-file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-[#E86A7A] hover:file:bg-rose-100" />
+        </div>
+        <div class="text-center text-xs text-slate-400 font-medium">— ATAU tempel link gambar —</div>
+        <div>
+          <input type="url" id="mood-item-url" placeholder="https://contoh.com/gambar-dekor.jpg" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm" />
+        </div>
+        <div class="grid grid-cols-3 gap-3 items-center">
+          <div class="col-span-2">
+            <label class="block text-xs font-bold text-slate-600 mb-1">Catatan Singkat</label>
+            <input type="text" id="mood-item-note" placeholder="Vendor / detail bahan..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Aksen Warna</label>
+            <input type="color" id="mood-item-color" value="#F49AC1" class="w-full h-9 rounded-xl cursor-pointer border border-slate-200" />
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('mood-modal')" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-500 hover:bg-slate-100">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl text-sm font-semibold bg-[#E86A7A] hover:bg-[#d85869] text-white shadow-sm">Simpan ke Moodboard</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Custom Prompt / Input Dialog (Replaces browser prompt/confirm) -->
+  <div id="custom-dialog" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-sky-100 space-y-4">
+      <h3 id="dialog-title" class="font-romantic text-xl font-bold text-slate-800">Judul</h3>
+      <p id="dialog-message" class="text-sm text-slate-600 hidden"></p>
+      <input type="text" id="dialog-input" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#62B4E8] focus:outline-none hidden" />
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="dialog-cancel-btn" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-500 hover:bg-slate-100">Batal</button>
+        <button id="dialog-confirm-btn" class="px-5 py-2 rounded-xl text-sm font-semibold bg-[#3B8AC4] hover:bg-[#2f75a8] text-white shadow-sm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Image Lightbox Modal -->
+  <div id="lightbox-modal" onclick="closeModal('lightbox-modal')" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div onclick="event.stopPropagation()" class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl">
+      <img id="lightbox-img" src="" alt="Preview" class="w-full max-h-[70vh] object-contain bg-slate-50" />
+      <div class="p-4 flex items-center justify-between">
+        <div>
+          <h4 id="lightbox-title" class="font-bold text-slate-800"></h4>
+          <p id="lightbox-note" class="text-xs text-slate-500"></p>
+        </div>
+        <button onclick="closeModal('lightbox-modal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STATE MANAGEMENT & DEFAULT DATA ====================
+    const STORAGE_KEY = 'forever_garden_wedding_planner_v1';
+
+    const defaultData = {
+      couple: {
+        bride: 'Aisyah',
+        groom: 'Raka',
+        weddingDate: '2026-12-12T08:00',
+        venue: 'Taman Bunga & Pendopo Asri',
+        coverImage: '',
+        notes: 'Jangan lupa konfirmasi ukuran cincin nikah minggu depan dan diskusikan tema bunga pelaminan bersama vendor dekorasi ya sayang!'
+      },
+      budgetCategories: [
+        {
+          id: 'cat-1',
+          title: 'Seserahan & Mahar',
+          items: [
+            { id: 'itm-1', name: 'Seperangkat Alat Sholat & Mukena Bordir', vendor: 'Boutique Khadijah', qty: 1, price: 850000, status: 'Lunas' },
+            { id: 'itm-2', name: 'Paket Skincare & Makeup', vendor: 'Sociolla / Sephora', qty: 1, price: 1500000, status: 'DP' },
+            { id: 'itm-3', name: 'Tas & Sepatu Pesta Pastel', vendor: 'Charles & Keith', qty: 2, price: 950000, status: 'Booking' },
+            { id: 'itm-4', name: 'Jasa Hias Kotak Seserahan Akrilik', vendor: 'Gardenia Hantaran', qty: 8, price: 125000, status: 'DP' }
+          ]
+        },
+        {
+          id: 'cat-2',
+          title: 'Venue, Katering & Dekorasi',
+          items: [
+            { id: 'itm-5', name: 'Paket Dekorasi Taman Bunga Pastel', vendor: 'Blossom Dream Decor', qty: 1, price: 18500000, status: 'DP' },
+            { id: 'itm-6', name: 'Katering Prasmanan & Gubukan (300 Porsi)', vendor: 'Rasa Nusantara Catering', qty: 300, price: 75000, status: 'Booking' }
+          ]
+        },
+        {
+          id: 'cat-3',
+          title: 'Busana Pengantin, MUA & Dokumentasi',
+          items: [
+            { id: 'itm-7', name: 'Sewa Kebaya Akad & Gaun Resepsi + Beskap', vendor: 'Atelier Putih', qty: 1, price: 8500000, status: 'DP' },
+            { id: 'itm-8', name: 'Paket Foto & Video Cinematic (Akad + Resepsi)', vendor: 'Langit Cerah Studio', qty: 1, price: 6500000, status: 'Lunas' }
+          ]
+        }
+      ],
+      guests: [
+        { id: 'g-1', name: 'Kel. Bpk. H. Ahmad Fauzi', type: 'Cetak', status: 'Sudah Diundang', rsvp: 'Hadir' },
+        { id: 'g-2', name: 'Nadia Putri & Partner', type: 'Digital', status: 'Sudah Diundang', rsvp: 'Hadir' },
+        { id: 'g-3', name: 'Dimas Pratama & Istri', type: 'Digital', status: 'Belum Diundang', rsvp: 'Belum Konfirmasi' },
+        { id: 'g-4', name: 'Ibu Dr. Ratna Sari', type: 'Cetak', status: 'Sudah Diundang', rsvp: 'Tidak' },
+        { id: 'g-5', name: 'Teman Kuliah Angkatan 2020 (Grup)', type: 'Digital', status: 'Belum Diundang', rsvp: 'Belum Konfirmasi' }
+      ],
+      timelinePhases: [
+        {
+          id: 'ph-1',
+          title: 'H-12 s/d H-9 Bulan (Fondasi & Konsep)',
+          tasks: [
+            { id: 't-1', text: 'Menentukan tanggal pernikahan & konsep acara bersama keluarga', assignee: 'Bersama', done: true },
+            { id: 't-2', text: 'Menyusun estimasi total anggaran pernikahan', assignee: 'Bersama', done: true },
+            { id: 't-3', text: 'Survei & booking venue / gedung / taman acara', assignee: 'Pria', done: false }
+          ]
+        },
+        {
+          id: 'ph-2',
+          title: 'H-8 s/d H-6 Bulan (Vendor Utama)',
+          tasks: [
+            { id: 't-4', text: 'Memilih & DP vendor Katering, Dekorasi, dan Dokumentasi', assignee: 'Bersama', done: false },
+            { id: 't-5', text: 'Booking MUA dan desain busana akad & resepsi', assignee: 'Wanita', done: false },
+            { id: 't-6', text: 'Menyusun draf awal daftar tamu undangan', assignee: 'Bersama', done: false }
+          ]
+        },
+        {
+          id: 'ph-3',
+          title: 'H-5 s/d H-3 Bulan (Administrasi & Detail)',
+          tasks: [
+            { id: 't-7', text: 'Mengurus berkas administrasi pernikahan ke KUA', assignee: 'Pria', done: false },
+            { id: 't-8', text: 'Belanja barang seserahan & cincin pernikahan', assignee: 'Bersama', done: false },
+            { id: 't-9', text: 'Desain undangan cetak & pembuatan website undangan digital', assignee: 'Wanita', done: false }
+          ]
+        },
+        {
+          id: 'ph-4',
+          title: 'H-2 s/d H-1 Bulan (Finalisasi)',
+          tasks: [
+            { id: 't-10', text: 'Fitting akhir busana pengantin & keluarga', assignee: 'Wanita', done: false },
+            { id: 't-11', text: 'Sebar undangan cetak & kirim link undangan digital', assignee: 'Bersama', done: false },
+            { id: 't-12', text: 'Technical meeting bersama seluruh vendor & panitia keluarga', assignee: 'Bersama', done: false }
+          ]
+        }
+      ],
+      moodboard: {
+        activeCollectionId: 'col-1',
+        collections: [
+          {
+            id: 'col-1',
+            name: 'Moodboard Dekor',
+            items: [
+              {
+                id: 'm-1',
+                title: 'Taman Bunga Pastel & Langit Biru',
+                note: 'Kombinasi bunga poppy merah muda, marigold kuning, dan dedaunan hijau segar',
+                color: '#8CB865',
+                image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80'
+              },
+              {
+                id: 'm-2',
+                title: 'Meja Tamu & Centerpiece Bunga Liar',
+                note: 'Vas keramik putih dengan bunga-bunga warna pastel lembut',
+                color: '#F49AC1',
+                image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=800&q=80'
+              }
+            ]
+          },
+          {
+            id: 'col-2',
+            name: 'Moodboard Gaun & Busana',
+            items: [
+              {
+                id: 'm-3',
+                title: 'Kebaya Putih Bordir Bunga Pastel',
+                note: 'Veil putih lembut dengan detail sulaman bunga kecil di tepian',
+                color: '#FCEEF3',
+                image: 'https://images.unsplash.com/photo-1594552072238-b8a33785b261?auto=format&fit=crop&w=800&q=80'
+              }
+            ]
+          },
+          {
+            id: 'col-3',
+            name: 'Moodboard Warna & Bunga',
+            items: [
+              {
+                id: 'm-4',
+                title: 'Buket Pengantin Garden Whimsical',
+                note: 'Perpaduan coral pink, kuning marigold, baby blue, dan putih bersih',
+                color: '#E86A7A',
+                image: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80'
+              }
+            ]
+          }
+        ]
+      }
+    };
+
+    let appData = loadData();
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Gagal memuat data:', e);
+      }
+      return JSON.parse(JSON.stringify(defaultData));
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        updateDashboardKPIs();
+      } catch (e) {
+        showToast('Penyimpanan penuh! Coba gunakan gambar dengan ukuran lebih kecil.', 'error');
+      }
+    }
+
+    // ==================== UTILITIES & CUSTOM DIALOGS ====================
+    function formatRupiah(num) {
+      return 'Rp ' + (Number(num) || 0).toLocaleString('id-ID');
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bg = type === 'error' ? 'bg-[#E86A7A]' : 'bg-[#3B8AC4]';
+      toast.className = `${bg} text-white px-4 py-2.5 rounded-2xl shadow-lg text-xs font-semibold flex items-center gap-2 transition-all transform translate-y-2 opacity-0`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 2800);
+    }
+
+    function openCustomPrompt({ title, message = '', defaultValue = '', isConfirmOnly = false, onConfirm }) {
+      const modal = document.getElementById('custom-dialog');
+      const titleEl = document.getElementById('dialog-title');
+      const msgEl = document.getElementById('dialog-message');
+      const inputEl = document.getElementById('dialog-input');
+      const confirmBtn = document.getElementById('dialog-confirm-btn');
+      const cancelBtn = document.getElementById('dialog-cancel-btn');
+
+      titleEl.textContent = title;
+      if (message) {
+        msgEl.textContent = message;
+        msgEl.classList.remove('hidden');
+      } else {
+        msgEl.classList.add('hidden');
+      }
+
+      if (isConfirmOnly) {
+        inputEl.classList.add('hidden');
+      } else {
+        inputEl.classList.remove('hidden');
+        inputEl.value = defaultValue;
+      }
+
+      modal.classList.remove('hidden');
+      if (!isConfirmOnly) setTimeout(() => inputEl.focus(), 50);
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+      };
+
+      cancelBtn.onclick = cleanup;
+      confirmBtn.onclick = () => {
+        const val = inputEl.value.trim();
+        cleanup();
+        onConfirm(isConfirmOnly ? true : val);
+      };
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // ==================== NAVIGATION ====================
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`pane-${tabName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.classList.remove('bg-[#3B8AC4]', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-white/70', 'text-slate-600');
+      });
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      activeBtn.classList.remove('bg-white/70', 'text-slate-600');
+      activeBtn.classList.add('bg-[#3B8AC4]', 'text-white', 'shadow-sm');
+    }
+
+    // ==================== 1. DASHBOARD & COUNTDOWN ====================
+    function renderCoupleInfo() {
+      const { bride, groom, weddingDate, venue, coverImage, notes } = appData.couple;
+      const namesText = `${bride || 'Calon Pengantin Wanita'} & ${groom || 'Pria'}`;
+      document.getElementById('nav-couple-names').textContent = namesText;
+      document.getElementById('hero-couple-names').textContent = namesText;
+      document.getElementById('hero-venue-text').querySelector('span').textContent = venue || 'Lokasi Pernikahan';
+      document.getElementById('couple-notes').value = notes || '';
+
+      if (weddingDate) {
+        const d = new Date(weddingDate);
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateStr = d.toLocaleDateString('id-ID', options);
+        const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('hero-wedding-date-text').querySelector('span').textContent = `${dateStr} • Pukul ${timeStr} WIB`;
+      }
+
+      const imgEl = document.getElementById('hero-cover-img');
+      const svgEl = document.getElementById('hero-default-svg');
+      const resetBtn = document.getElementById('reset-cover-btn');
+      if (coverImage) {
+        imgEl.src = coverImage;
+        imgEl.classList.remove('hidden');
+        svgEl.classList.add('hidden');
+        resetBtn.classList.remove('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+        svgEl.classList.remove('hidden');
+        resetBtn.classList.add('hidden');
+      }
+    }
+
+    function updateCountdown() {
+      const target = new Date(appData.couple.weddingDate).getTime();
+      const now = Date.now();
+      const diff = Math.max(0, target - now);
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      document.getElementById('cd-days').textContent = days;
+      document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
+    }
+
+    function openCoupleModal() {
+      document.getElementById('input-bride').value = appData.couple.bride;
+      document.getElementById('input-groom').value = appData.couple.groom;
+      document.getElementById('input-wedding-date').value = appData.couple.weddingDate;
+      document.getElementById('input-venue').value = appData.couple.venue;
+      document.getElementById('couple-modal').classList.remove('hidden');
+    }
+
+    function saveCoupleSettings() {
+      appData.couple.bride = document.getElementById('input-bride').value.trim() || 'Pengantin Wanita';
+      appData.couple.groom = document.getElementById('input-groom').value.trim() || 'Pengantin Pria';
+      appData.couple.weddingDate = document.getElementById('input-wedding-date').value;
+      appData.couple.venue = document.getElementById('input-venue').value.trim();
+      saveData();
+      renderCoupleInfo();
+      updateCountdown();
+      closeModal('couple-modal');
+      showToast('Data pengantin & tanggal diperbarui!');
+    }
+
+    function uploadHeroCover(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      compressImage(file, 600, (dataUrl) => {
+        appData.couple.coverImage = dataUrl;
+        saveData();
+        renderCoupleInfo();
+        showToast('Foto cover berhasil diperbarui!');
+      });
+    }
+
+    function resetHeroCover() {
+      appData.couple.coverImage = '';
+      saveData();
+      renderCoupleInfo();
+      showToast('Ilustrasi taman bawaan dikembalikan');
+    }
+
+    function saveNotes(val) {
+      appData.couple.notes = val;
+      saveData();
+    }
+
+    function updateDashboardKPIs() {
+      // Budget KPI
+      let grandTotal = 0, paidTotal = 0;
+      appData.budgetCategories.forEach(cat => {
+        cat.items.forEach(item => {
+          const sub = (Number(item.qty) || 0) * (Number(item.price) || 0);
+          grandTotal += sub;
+          if (item.status === 'Lunas') paidTotal += sub;
+        });
+      });
+      document.getElementById('dash-budget-total').textContent = formatRupiah(grandTotal);
+      document.getElementById('dash-budget-sub').textContent = `Lunas: ${formatRupiah(paidTotal)}`;
+
+      // Guest KPI
+      const totalGuests = appData.guests.length;
+      const attendingGuests = appData.guests.filter(g => g.rsvp === 'Hadir').length;
+      document.getElementById('dash-guest-total').textContent = `${totalGuests} Tamu`;
+      document.getElementById('dash-guest-sub').textContent = `${attendingGuests} Konfirmasi Hadir`;
+
+      // Checklist KPI
+      let totalTasks = 0, doneTasks = 0;
+      appData.timelinePhases.forEach(ph => {
+        totalTasks += ph.tasks.length;
+        doneTasks += ph.tasks.filter(t => t.done).length;
+      });
+      const pct = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
+      document.getElementById('dash-task-percent').textContent = `${pct}% (${doneTasks}/${totalTasks})`;
+      document.getElementById('dash-task-bar').style.width = `${pct}%`;
+
+      // Moodboard KPI
+      const totalCols = appData.moodboard.collections.length;
+      const totalMoods = appData.moodboard.collections.reduce((sum, c) => sum + c.items.length, 0);
+      document.getElementById('dash-mood-total').textContent = `${totalCols} Koleksi`;
+      document.getElementById('dash-mood-sub').textContent = `${totalMoods} Inspirasi tersimpan`;
+    }
+
+    // ==================== 2. BUDGET CALCULATOR ====================
+    function renderBudget() {
+      const container = document.getElementById('budget-categories-container');
+      container.innerHTML = '';
+
+      let grandTotal = 0, paidTotal = 0, pendingTotal = 0;
+
+      appData.budgetCategories.forEach((cat) => {
+        let catSubtotal = 0;
+        cat.items.forEach(item => {
+          const rowTotal = (Number(item.qty) || 0) * (Number(item.price) || 0);
+          catSubtotal += rowTotal;
+          grandTotal += rowTotal;
+          if (item.status === 'Lunas') paidTotal += rowTotal;
+          else pendingTotal += rowTotal;
+        });
+
+        const card = document.createElement('div');
+        card.className = 'garden-card rounded-3xl p-5 sm:p-6 space-y-4';
+
+        const statusBadgeColor = (status) => {
+          if (status === 'Lunas') return 'bg-emerald-50 text-[#6E9E47] border-emerald-200';
+          if (status === 'DP') return 'bg-amber-50 text-amber-700 border-amber-200';
+          return 'bg-sky-50 text-[#3B8AC4] border-sky-200';
+        };
+
+        card.innerHTML = `
+          <!-- Category Header (Editable Title) -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2 flex-1 min-w-[220px]">
+              <span class="w-3 h-3 rounded-full bg-[#E86A7A]"></span>
+              <input type="text" value="${escapeHtml(cat.title)}"
+                onchange="renameBudgetCategory('${cat.id}', this.value)"
+                title="Klik untuk ubah judul part ini"
+                class="font-romantic text-xl font-bold text-slate-800 bg-transparent hover:bg-sky-50/70 focus:bg-white px-2 py-1 rounded-xl border border-transparent focus:border-[#62B4E8] focus:outline-none w-full max-w-md transition" />
+              <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <span class="text-[11px] uppercase font-bold text-slate-400 block">Subtotal Part</span>
+                <span class="font-bold text-base text-[#3B8AC4]">${formatRupiah(catSubtotal)}</span>
+              </div>
+              <button onclick="deleteBudgetCategory('${cat.id}')" title="Hapus Kategori Ini" class="p-2 rounded-xl text-slate-400 hover:text-[#E86A7A] hover:bg-rose-50 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Responsive Table -->
+          <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <table class="w-full text-left border-collapse min-w-[780px]">
+              <thead>
+                <tr class="bg-sky-50/80 text-slate-700 text-[11px] uppercase tracking-wider border-b border-slate-200">
+                  <th class="py-3 px-3 w-12 text-center">No</th>
+                  <th class="py-3 px-3">Nama Barang</th>
+                  <th class="py-3 px-3">Nama Toko / Vendor</th>
+                  <th class="py-3 px-3 w-24 text-center">Jumlah</th>
+                  <th class="py-3 px-3 w-36">Harga Barang (Rp)</th>
+                  <th class="py-3 px-3 w-36">Total</th>
+                  <th class="py-3 px-3 w-32">Status</th>
+                  <th class="py-3 px-3 w-14 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-sm">
+                ${cat.items.map((item, idx) => {
+                  const rowTotal = (Number(item.qty) || 0) * (Number(item.price) || 0);
+                  return `
+                    <tr class="hover:bg-sky-50/30 transition">
+                      <td class="py-2.5 px-3 text-center font-semibold text-slate-400">${idx + 1}</td>
+                      <td class="py-2 px-3">
+                        <input type="text" value="${escapeHtml(item.name)}"
+                          onchange="updateBudgetItem('${cat.id}', '${item.id}', 'name', this.value)"
+                          placeholder="Nama barang..."
+                          class="w-full px-2 py-1 rounded-lg bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-[#62B4E8] focus:outline-none font-medium text-slate-800" />
+                      </td>
+                      <td class="py-2 px-3">
+                        <input type="text" value="${escapeHtml(item.vendor)}"
+                          onchange="updateBudgetItem('${cat.id}', '${item.id}', 'vendor', this.value)"
+                          placeholder="Nama toko..."
+                          class="w-full px-2 py-1 rounded-lg bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-[#62B4E8] focus:outline-none text-slate-600" />
+                      </td>
+                      <td class="py-2 px-3">
+                        <input type="number" min="1" value="${item.qty}"
+                          onchange="updateBudgetItem('${cat.id}', '${item.id}', 'qty', Number(this.value))"
+                          class="w-full px-2 py-1 rounded-lg text-center bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-[#62B4E8] focus:outline-none font-semibold text-slate-700" />
+                      </td>
+                      <td class="py-2 px-3">
+                        <input type="number" min="0" step="1000" value="${item.price}"
+                          onchange="updateBudgetItem('${cat.id}', '${item.id}', 'price', Number(this.value))"
+                          class="w-full px-2 py-1 rounded-lg bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-[#62B4E8] focus:outline-none text-slate-700" />
+                      </td>
+                      <td class="py-2.5 px-3 font-bold text-slate-800 whitespace-nowrap">
+                        ${formatRupiah(rowTotal)}
+                      </td>
+                      <td class="py-2 px-3">
+                        <select onchange="updateBudgetItem('${cat.id}', '${item.id}', 'status', this.value)"
+                          class="w-full px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer focus:outline-none ${statusBadgeColor(item.status)}">
+                          <option value="Booking" ${item.status === 'Booking' ? 'selected' : ''}>Booking</option>
+                          <option value="DP" ${item.status === 'DP' ? 'selected' : ''}>DP</option>
+                          <option value="Lunas" ${item.status === 'Lunas' ? 'selected' : ''}>Lunas</option>
+                        </select>
+                      </td>
+                      <td class="py-2 px-3 text-center">
+                        <button onclick="deleteBudgetItem('${cat.id}', '${item.id}')" title="Hapus Baris" class="p-1.5 rounded-lg text-slate-400 hover:text-[#E86A7A] hover:bg-rose-50 transition">
+                          <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <button onclick="addBudgetItem('${cat.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-[#3B8AC4] text-xs font-bold transition">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              Tambah Barang / Item di "${escapeHtml(cat.title)}"
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('budget-grand-total').textContent = formatRupiah(grandTotal);
+      document.getElementById('budget-paid-total').textContent = formatRupiah(paidTotal);
+      document.getElementById('budget-pending-total').textContent = formatRupiah(pendingTotal);
+
+      lucide.createIcons();
+    }
+
+    function addBudgetCategory() {
+      openCustomPrompt({
+        title: 'Tambah Part / Kategori Anggaran',
+        defaultValue: 'Kategori Baru (Misal: Souvenir)',
+        onConfirm: (val) => {
+          if (!val) return;
+          appData.budgetCategories.push({
+            id: 'cat-' + Date.now(),
+            title: val,
+            items: [
+              { id: 'itm-' + Date.now(), name: 'Item Pertama', vendor: 'Nama Toko', qty: 1, price: 0, status: 'Booking' }
+            ]
+          });
+          saveData();
+          renderBudget();
+          showToast(`Part "${val}" ditambahkan!`);
+        }
+      });
+    }
+
+    function renameBudgetCategory(catId, newTitle) {
+      const cat = appData.budgetCategories.find(c => c.id === catId);
+      if (cat && newTitle.trim()) {
+        cat.title = newTitle.trim();
+        saveData();
+        renderBudget();
+        showToast('Judul part berhasil diperbarui');
+      }
+    }
+
+    function deleteBudgetCategory(catId) {
+      openCustomPrompt({
+        title: 'Hapus Part Anggaran?',
+        message: 'Semua daftar barang di dalam kategori ini akan ikut terhapus.',
+        isConfirmOnly: true,
+        onConfirm: () => {
+          appData.budgetCategories = appData.budgetCategories.filter(c => c.id !== catId);
+          saveData();
+          renderBudget();
+          showToast('Kategori dihapus');
+        }
+      });
+    }
+
+    function addBudgetItem(catId) {
+      const cat = appData.budgetCategories.find(c => c.id === catId);
+      if (!cat) return;
+      cat.items.push({
+        id: 'itm-' + Date.now(),
+        name: '',
+        vendor: '',
+        qty: 1,
+        price: 0,
+        status: 'Booking'
+      });
+      saveData();
+      renderBudget();
+    }
+
+    function updateBudgetItem(catId, itemId, field, value) {
+      const cat = appData.budgetCategories.find(c => c.id === catId);
+      if (!cat) return;
+      const item = cat.items.find(i => i.id === itemId);
+      if (!item) return;
+      item[field] = value;
+      saveData();
+      renderBudget();
+    }
+
+    function deleteBudgetItem(catId, itemId) {
+      const cat = appData.budgetCategories.find(c => c.id === catId);
+      if (!cat) return;
+      cat.items = cat.items.filter(i => i.id !== itemId);
+      saveData();
+      renderBudget();
+    }
+
+    // ==================== 3. GUEST LIST ====================
+    function renderGuests() {
+      const search = document.getElementById('guest-search').value.toLowerCase();
+      const filterType = document.getElementById('guest-filter-type').value;
+      const filterStatus = document.getElementById('guest-filter-status').value;
+      const filterRsvp = document.getElementById('guest-filter-rsvp').value;
+
+      // Update Counters
+      const all = appData.guests;
+      document.getElementById('guest-stat-total').textContent = `Total: ${all.length}`;
+      document.getElementById('guest-stat-cetak').textContent = `Cetak: ${all.filter(g => g.type === 'Cetak').length}`;
+      document.getElementById('guest-stat-digital').textContent = `Digital: ${all.filter(g => g.type === 'Digital').length}`;
+      document.getElementById('guest-stat-hadir').textContent = `Hadir: ${all.filter(g => g.rsvp === 'Hadir').length}`;
+      document.getElementById('guest-stat-tidak').textContent = `Tidak: ${all.filter(g => g.rsvp === 'Tidak').length}`;
+
+      const filtered = all.filter(g => {
+        const matchName = g.name.toLowerCase().includes(search);
+        const matchType = filterType === 'ALL' || g.type === filterType;
+        const matchStatus = filterStatus === 'ALL' || g.status === filterStatus;
+        const matchRsvp = filterRsvp === 'ALL' || g.rsvp === filterRsvp;
+        return matchName && matchType && matchStatus && matchRsvp;
+      });
+
+      const tbody = document.getElementById('guest-table-body');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-sm">Belum ada data tamu yang cocok.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((guest, index) => {
+        const rsvpStyle = guest.rsvp === 'Hadir'
+          ? 'bg-emerald-50 text-[#6E9E47] border-emerald-200'
+          : guest.rsvp === 'Tidak'
+            ? 'bg-rose-50 text-[#E86A7A] border-rose-200'
+            : 'bg-slate-50 text-slate-600 border-slate-200';
+
+        const statusStyle = guest.status === 'Sudah Diundang'
+          ? 'bg-sky-50 text-[#3B8AC4] border-sky-200'
+          : 'bg-amber-50 text-amber-700 border-amber-200';
+
+        return `
+          <tr class="hover:bg-sky-50/30 transition">
+            <td class="py-2.5 px-4 text-center font-semibold text-slate-400">${index + 1}</td>
+            <td class="py-2 px-4">
+              <input type="text" value="${escapeHtml(guest.name)}"
+                onchange="updateGuest('${guest.id}', 'name', this.value)"
+                class="w-full px-2 py-1 rounded-lg bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-[#62B4E8] focus:outline-none font-medium text-slate-800" />
+            </td>
+            <td class="py-2 px-4">
+              <select onchange="updateGuest('${guest.id}', 'type', this.value)"
+                class="w-full px-2.5 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-700 cursor-pointer">
+                <option value="Cetak" ${guest.type === 'Cetak' ? 'selected' : ''}>Cetak</option>
+                <option value="Digital" ${guest.type === 'Digital' ? 'selected' : ''}>Digital</option>
+              </select>
+            </td>
+            <td class="py-2 px-4">
+              <select onchange="updateGuest('${guest.id}', 'status', this.value)"
+                class="w-full px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${statusStyle}">
+                <option value="Belum Diundang" ${guest.status === 'Belum Diundang' ? 'selected' : ''}>Belum Diundang</option>
+                <option value="Sudah Diundang" ${guest.status === 'Sudah Diundang' ? 'selected' : ''}>Sudah Diundang</option>
+              </select>
+            </td>
+            <td class="py-2 px-4">
+              <select onchange="updateGuest('${guest.id}', 'rsvp', this.value)"
+                class="w-full px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${rsvpStyle}">
+                <option value="Belum Konfirmasi" ${guest.rsvp === 'Belum Konfirmasi' ? 'selected' : ''}>Belum Konfirmasi</option>
+                <option value="Hadir" ${guest.rsvp === 'Hadir' ? 'selected' : ''}>Hadir</option>
+                <option value="Tidak" ${guest.rsvp === 'Tidak' ? 'selected' : ''}>Tidak</option>
+              </select>
+            </td>
+            <td class="py-2 px-4 text-center">
+              <button onclick="deleteGuest('${guest.id}')" title="Hapus Tamu" class="p-1.5 rounded-lg text-slate-400 hover:text-[#E86A7A] hover:bg-rose-50 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function addGuest(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('new-guest-name');
+      const typeInput = document.getElementById('new-guest-type');
+      const statusInput = document.getElementById('new-guest-status');
+
+      const name = nameInput.value.trim();
+      if (!name) return;
+
+      appData.guests.unshift({
+        id: 'g-' + Date.now(),
+        name,
+        type: typeInput.value,
+        status: statusInput.value,
+        rsvp: 'Belum Konfirmasi'
+      });
+
+      nameInput.value = '';
+      saveData();
+      renderGuests();
+      showToast(`Tamu "${name}" ditambahkan!`);
+    }
+
+    function updateGuest(id, field, value) {
+      const guest = appData.guests.find(g => g.id === id);
+      if (!guest) return;
+      guest[field] = value;
+      saveData();
+      renderGuests();
+    }
+
+    function deleteGuest(id) {
+      appData.guests = appData.guests.filter(g => g.id !== id);
+      saveData();
+      renderGuests();
+      showToast('Tamu dihapus dari daftar');
+    }
+
+    // ==================== 4. CHECKLIST & TIMELINE ====================
+    function renderChecklist() {
+      const container = document.getElementById('timeline-phases-container');
+      container.innerHTML = '';
+
+      let totalTasks = 0, doneTasks = 0;
+
+      appData.timelinePhases.forEach(phase => {
+        totalTasks += phase.tasks.length;
+        const phaseDone = phase.tasks.filter(t => t.done).length;
+        doneTasks += phaseDone;
+
+        const phaseCard = document.createElement('div');
+        phaseCard.className = 'garden-card rounded-3xl p-5 sm:p-6 space-y-4';
+
+        const assigneeBadge = (who) => {
+          if (who === 'Wanita') return 'bg-rose-50 text-[#E86A7A]';
+          if (who === 'Pria') return 'bg-sky-50 text-[#3B8AC4]';
+          return 'bg-emerald-50 text-[#6E9E47]';
+        };
+
+        phaseCard.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2 flex-1 min-w-[240px]">
+              <div class="w-8 h-8 rounded-xl bg-emerald-50 text-[#6E9E47] flex items-center justify-center shrink-0">
+                <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+              </div>
+              <input type="text" value="${escapeHtml(phase.title)}"
+                onchange="renameTimelinePhase('${phase.id}', this.value)"
+                title="Klik untuk ubah nama fase waktu"
+                class="font-romantic text-lg sm:text-xl font-bold text-slate-800 bg-transparent hover:bg-emerald-50/50 focus:bg-white px-2 py-1 rounded-xl border border-transparent focus:border-[#6E9E47] focus:outline-none w-full transition" />
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-[#6E9E47]">${phaseDone}/${phase.tasks.length} Selesai</span>
+              <button onclick="deleteTimelinePhase('${phase.id}')" title="Hapus Fase Ini" class="p-2 rounded-xl text-slate-400 hover:text-[#E86A7A] hover:bg-rose-50 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-2.5">
+            ${phase.tasks.map(task => `
+              <div class="flex items-center gap-3 p-2.5 rounded-2xl border ${task.done ? 'bg-emerald-50/40 border-emerald-100' : 'bg-white border-slate-100'} hover:border-sky-200 transition">
+                <input type="checkbox" ${task.done ? 'checked' : ''}
+                  onchange="toggleTask('${phase.id}', '${task.id}')"
+                  class="w-5 h-5 rounded-lg accent-[#6E9E47] cursor-pointer shrink-0" />
+                <input type="text" value="${escapeHtml(task.text)}"
+                  onchange="updateTask('${phase.id}', '${task.id}', 'text', this.value)"
+                  class="flex-1 text-sm bg-transparent focus:bg-white px-2 py-1 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#62B4E8] ${task.done ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}" />
+                <select onchange="updateTask('${phase.id}', '${task.id}', 'assignee', this.value)"
+                  class="px-2.5 py-1 rounded-xl text-xs font-bold cursor-pointer focus:outline-none ${assigneeBadge(task.assignee)}">
+                  <option value="Bersama" ${task.assignee === 'Bersama' ? 'selected' : ''}>Bersama</option>
+                  <option value="Wanita" ${task.assignee === 'Wanita' ? 'selected' : ''}>Wanita</option>
+                  <option value="Pria" ${task.assignee === 'Pria' ? 'selected' : ''}>Pria</option>
+                </select>
+                <button onclick="deleteTask('${phase.id}', '${task.id}')" title="Hapus Tugas" class="p-1.5 rounded-lg text-slate-300 hover:text-[#E86A7A] transition">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+
+          <div>
+            <button onclick="addTaskToPhase('${phase.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#6E9E47] text-xs font-bold transition">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              Tambah Tugas Baru
+            </button>
+          </div>
+        `;
+        container.appendChild(phaseCard);
+      });
+
+      const pct = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
+      document.getElementById('checklist-progress-text').textContent = `${doneTasks} / ${totalTasks} Tugas Selesai (${pct}%)`;
+      document.getElementById('checklist-progress-bar').style.width = `${pct}%`;
+
+      lucide.createIcons();
+    }
+
+    function addTimelinePhase() {
+      openCustomPrompt({
+        title: 'Tambah Fase Timeline Baru',
+        defaultValue: 'H-2 Minggu (Gladi Resik & Final Check)',
+        onConfirm: (val) => {
+          if (!val) return;
+          appData.timelinePhases.push({
+            id: 'ph-' + Date.now(),
+            title: val,
+            tasks: [
+              { id: 't-' + Date.now(), text: 'Tulis tugas persiapan di sini...', assignee: 'Bersama', done: false }
+            ]
+          });
+          saveData();
+          renderChecklist();
+          showToast('Fase timeline ditambahkan!');
+        }
+      });
+    }
+
+    function renameTimelinePhase(phaseId, newTitle) {
+      const ph = appData.timelinePhases.find(p => p.id === phaseId);
+      if (ph && newTitle.trim()) {
+        ph.title = newTitle.trim();
+        saveData();
+        showToast('Judul fase diperbarui');
+      }
+    }
+
+    function deleteTimelinePhase(phaseId) {
+      openCustomPrompt({
+        title: 'Hapus Fase Timeline?',
+        message: 'Seluruh daftar tugas di fase waktu ini akan ikut terhapus.',
+        isConfirmOnly: true,
+        onConfirm: () => {
+          appData.timelinePhases = appData.timelinePhases.filter(p => p.id !== phaseId);
+          saveData();
+          renderChecklist();
+          showToast('Fase dihapus');
+        }
+      });
+    }
+
+    function addTaskToPhase(phaseId) {
+      const ph = appData.timelinePhases.find(p => p.id === phaseId);
+      if (!ph) return;
+      ph.tasks.push({
+        id: 't-' + Date.now(),
+        text: 'Tugas persiapan baru',
+        assignee: 'Bersama',
+        done: false
+      });
+      saveData();
+      renderChecklist();
+    }
+
+    function toggleTask(phaseId, taskId) {
+      const ph = appData.timelinePhases.find(p => p.id === phaseId);
+      if (!ph) return;
+      const t = ph.tasks.find(item => item.id === taskId);
+      if (t) {
+        t.done = !t.done;
+        saveData();
+        renderChecklist();
+      }
+    }
+
+    function updateTask(phaseId, taskId, field, value) {
+      const ph = appData.timelinePhases.find(p => p.id === phaseId);
+      if (!ph) return;
+      const t = ph.tasks.find(item => item.id === taskId);
+      if (t) {
+        t[field] = value;
+        saveData();
+        renderChecklist();
+      }
+    }
+
+    function deleteTask(phaseId, taskId) {
+      const ph = appData.timelinePhases.find(p => p.id === phaseId);
+      if (!ph) return;
+      ph.tasks = ph.tasks.filter(item => item.id !== taskId);
+      saveData();
+      renderChecklist();
+    }
+
+    // ==================== 5. MOODBOARD COLLECTIONS ====================
+    function renderMoodboard() {
+      const { collections, activeCollectionId } = appData.moodboard;
+      const tabsContainer = document.getElementById('moodboard-collections-tabs');
+      tabsContainer.innerHTML = '';
+
+      if (collections.length === 0) {
+        collections.push({ id: 'col-' + Date.now(), name: 'Moodboard Utama', items: [] });
+        appData.moodboard.activeCollectionId = collections[0].id;
+      }
+
+      let activeCol = collections.find(c => c.id === activeCollectionId) || collections[0];
+      appData.moodboard.activeCollectionId = activeCol.id;
+
+      collections.forEach(col => {
+        const isActive = col.id === activeCol.id;
+        const btn = document.createElement('button');
+        btn.className = isActive
+          ? 'px-4 py-2 rounded-2xl text-xs font-bold bg-[#E86A7A] text-white shadow-sm flex items-center gap-1.5 transition'
+          : 'px-4 py-2 rounded-2xl text-xs font-semibold bg-white hover:bg-rose-50 text-slate-600 border border-slate-200 flex items-center gap-1.5 transition';
+        btn.innerHTML = `<span>${escapeHtml(col.name)}</span> <span class="px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'}">${col.items.length}</span>`;
+        btn.onclick = () => {
+          appData.moodboard.activeCollectionId = col.id;
+          saveData();
+          renderMoodboard();
+        };
+        tabsContainer.appendChild(btn);
+      });
+
+      document.getElementById('active-collection-title').textContent = activeCol.name;
+
+      const gallery = document.getElementById('moodboard-gallery');
+      if (activeCol.items.length === 0) {
+        gallery.innerHTML = `
+          <div class="col-span-full py-12 text-center bg-white/60 rounded-3xl border border-dashed border-rose-200">
+            <p class="text-slate-500 text-sm font-medium">Koleksi "${escapeHtml(activeCol.name)}" masih kosong.</p>
+            <button onclick="openAddMoodItemModal()" class="mt-3 px-4 py-2 rounded-xl bg-[#E86A7A] text-white text-xs font-semibold">
+              + Tambah Gambar Inspirasi Pertama
+            </button>
+          </div>
+        `;
+      } else {
+        gallery.innerHTML = activeCol.items.map(item => `
+          <div class="masonry-item group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition">
+            <div class="relative overflow-hidden cursor-pointer" onclick="openLightbox('${activeCol.id}', '${item.id}')">
+              <img src="${item.image}" alt="${escapeHtml(item.title)}"
+                onerror="this.src='https://placehold.co/600x400/FCEEF3/E86A7A?text=Inspirasi+Pernikahan'"
+                class="w-full h-auto object-cover group-hover:scale-105 transition duration-300" />
+              <div class="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="event.stopPropagation(); deleteMoodItem('${activeCol.id}', '${item.id}')" title="Hapus Gambar" class="p-2 rounded-xl bg-white/90 hover:bg-rose-500 hover:text-white text-slate-700 shadow-sm transition">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <h4 class="font-bold text-slate-800 text-sm">${escapeHtml(item.title)}</h4>
+                <span class="w-4 h-4 rounded-full border border-slate-200 shrink-0" style="background-color: ${item.color || '#F49AC1'}" title="Warna Tema"></span>
+              </div>
+              ${item.note ? `<p class="text-xs text-slate-500 leading-relaxed">${escapeHtml(item.note)}</p>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+    function addMoodboardCollection() {
+      openCustomPrompt({
+        title: 'Buat Koleksi Moodboard Baru',
+        defaultValue: 'Moodboard Undangan & Souvenir',
+        onConfirm: (val) => {
+          if (!val) return;
+          const newId = 'col-' + Date.now();
+          appData.moodboard.collections.push({ id: newId, name: val, items: [] });
+          appData.moodboard.activeCollectionId = newId;
+          saveData();
+          renderMoodboard();
+          showToast(`Koleksi "${val}" dibuat!`);
+        }
+      });
+    }
+
+    function renameActiveCollection() {
+      const col = appData.moodboard.collections.find(c => c.id === appData.moodboard.activeCollectionId);
+      if (!col) return;
+      openCustomPrompt({
+        title: 'Ubah Nama Koleksi',
+        defaultValue: col.name,
+        onConfirm: (val) => {
+          if (!val) return;
+          col.name = val;
+          saveData();
+          renderMoodboard();
+          showToast('Nama koleksi diperbarui');
+        }
+      });
+    }
+
+    function deleteActiveCollection() {
+      if (appData.moodboard.collections.length <= 1) {
+        showToast('Minimal harus ada 1 koleksi moodboard', 'error');
+        return;
+      }
+      openCustomPrompt({
+        title: 'Hapus Koleksi Ini?',
+        message: 'Semua gambar inspirasi di dalam koleksi ini akan ikut dihapus.',
+        isConfirmOnly: true,
+        onConfirm: () => {
+          appData.moodboard.collections = appData.moodboard.collections.filter(c => c.id !== appData.moodboard.activeCollectionId);
+          appData.moodboard.activeCollectionId = appData.moodboard.collections[0].id;
+          saveData();
+          renderMoodboard();
+          showToast('Koleksi dihapus');
+        }
+      });
+    }
+
+    function openAddMoodItemModal() {
+      const select = document.getElementById('mood-item-collection');
+      select.innerHTML = appData.moodboard.collections.map(c =>
+        `<option value="${c.id}" ${c.id === appData.moodboard.activeCollectionId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+      ).join('');
+
+      document.getElementById('mood-item-title').value = '';
+      document.getElementById('mood-item-file').value = '';
+      document.getElementById('mood-item-url').value = '';
+      document.getElementById('mood-item-note').value = '';
+      document.getElementById('mood-modal').classList.remove('hidden');
+    }
+
+    function saveMoodItem(event) {
+      event.preventDefault();
+      const colId = document.getElementById('mood-item-collection').value;
+      const title = document.getElementById('mood-item-title').value.trim();
+      const fileInput = document.getElementById('mood-item-file');
+      const urlInput = document.getElementById('mood-item-url').value.trim();
+      const note = document.getElementById('mood-item-note').value.trim();
+      const color = document.getElementById('mood-item-color').value;
+
+      const col = appData.moodboard.collections.find(c => c.id === colId);
+      if (!col || !title) return;
+
+      const finalizeAdd = (imageSrc) => {
+        col.items.unshift({
+          id: 'm-' + Date.now(),
+          title,
+          note,
+          color,
+          image: imageSrc || 'https://placehold.co/600x450/FCEEF3/E86A7A?text=' + encodeURIComponent(title)
+        });
+        appData.moodboard.activeCollectionId = colId;
+        saveData();
+        renderMoodboard();
+        closeModal('mood-modal');
+        showToast('Inspirasi ditambahkan ke moodboard!');
+      };
+
+      if (fileInput.files && fileInput.files[0]) {
+        compressImage(fileInput.files[0], 700, (dataUrl) => {
+          finalizeAdd(dataUrl);
+        });
+      } else {
+        finalizeAdd(urlInput);
+      }
+    }
+
+    function deleteMoodItem(colId, itemId) {
+      const col = appData.moodboard.collections.find(c => c.id === colId);
+      if (!col) return;
+      col.items = col.items.filter(i => i.id !== itemId);
+      saveData();
+      renderMoodboard();
+      showToast('Inspirasi dihapus');
+    }
+
+    function openLightbox(colId, itemId) {
+      const col = appData.moodboard.collections.find(c => c.id === colId);
+      if (!col) return;
+      const item = col.items.find(i => i.id === itemId);
+      if (!item) return;
+
+      document.getElementById('lightbox-img').src = item.image;
+      document.getElementById('lightbox-title').textContent = item.title;
+      document.getElementById('lightbox-note').textContent = item.note || '';
+      document.getElementById('lightbox-modal').classList.remove('hidden');
+    }
+
+    // ==================== IMAGE COMPRESSION & BACKUP/RESTORE ====================
+    function compressImage(file, maxWidth, callback) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width;
+          let h = img.height;
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', 0.78));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(appData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `wedding-planner-${appData.couple.bride}-${appData.couple.groom}.json`.toLowerCase().replace(/\s+/g, '-');
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('File backup berhasil diunduh!');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && parsed.couple && parsed.budgetCategories) {
+            appData = parsed;
+            saveData();
+            initApp();
+            showToast('Data berhasil dipulihkan!');
+          } else {
+            showToast('Format file backup tidak valid.', 'error');
+          }
+        } catch (err) {
+          showToast('Gagal membaca file JSON.', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ==================== INITIALIZATION ====================
+    function initApp() {
+      renderCoupleInfo();
+      updateCountdown();
+      renderBudget();
+      renderGuests();
+      renderChecklist();
+      renderMoodboard();
+      updateDashboardKPIs();
+      lucide.createIcons();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initApp();
+      setInterval(updateCountdown, 1000);
+    });
+  </script>
+</body>
+</html>

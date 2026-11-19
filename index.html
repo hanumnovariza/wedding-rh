@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Forever Garden — Wedding Planner</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            skyPastel: '#62B4E8',
+            skyDeep: '#3B8AC4',
+            meadow: '#6E9E47',
+            meadowLight: '#8CB865',
+            poppy: '#E86A7A',
+            poppySoft: '#FCEEF3',
+            marigold: '#F2B949',
+            cream: '#FFFDF9',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(180deg, #62B4E8 0%, #B8E1F8 26%, #FDFBF7 58%, #E3F0D4 86%, #C5DFAC 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #2D3748;
+    }
+
+    .font-romantic {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Soft floating clouds & floral card shadow */
+    .garden-card {
+      background: rgba(255, 253, 249, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 30px -5px rgba(59, 138, 196, 0.12), 0 4px 12px -2px rgba(110, 158, 71, 0.08);
+    }
+
+    .sky-hero-gradient {
+      background: linear-gradient(165deg, #54AEE6 0%, #8FD0F5 45%, #EBF7FD 78%, #DDF0CB 100%);
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #9CCAE8;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5CAEE3;
+    }
+
+    /* Masonry layout for moodboard */
+    .masonry-grid {
+      column-count: 1;
+      column-gap: 1.25rem;
+    }
+    @media (min-width: 640px) {
+      .masonry-grid { column-count: 2; }
+    }
+    @media (min-width: 1024px) {
+      .masonry-grid { column-count: 3; }
+    }
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Smooth tab transition */
+    .tab-pane {
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="antialiased pb-16">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-sky-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand / Couple Title -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#62B4E8] to-[#8CB865] flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="flower-2" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-[11px] uppercase tracking-widest font-semibold text-[#3B8AC4] block">Wedding Planner</span>
+          <h1 id="nav-couple-names" class="font-romantic font-bold text-lg text-slate-800 leading-tight">Aisyah &amp; Raka</h1>
+        </div>
+      </div>
+
+      <!-- Backup & Settings Actions -->
+      <div class="flex items-center gap-2">
+        <button onclick="openCoupleModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-[#3B8AC4] text-xs font-semibold transition">
+          <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Atur Pengantin &amp; Tanggal</span>
+        </button>
+        <button onclick="exportData()" title="Simpan Cadangan Data (JSON)" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#6E9E47] text-xs font-semibold transition">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Backup</span>
+        </button>
+        <label title="Muat Data Cadangan (JSON)" class="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#E86A7A] text-xs font-semibold transition">
+          <i data-lucide="upload" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Restore</span>
+          <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="max-w-6xl mx-auto px-4 overflow-x-auto">
+      <div class="flex space-x-1.5 pb-2.5 pt-1 min-w-max">
+        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="nav-tab active flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-[#3B8AC4] text-white shadow-sm">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Dashboard
+        </button>
+        <button onclick="switchTab('budget')" id="tab-btn-budget" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-white/70 text-slate-600 hover:bg-white">
+          <i data-lucide="wallet" class="w-4 h-4 text-[#E86A7A]"></i>
+          Budget Calculator
+        </button>
+        <button onclick="switchTab('guests')" id="tab-btn-guests" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-white/70 text-slate-600 hover:bg-white">
+          <i data-lucide="users" class="w-4 h-4 text-[#3B8AC4]"></i>
+          Guest List
+        </button>
+        <button onclick="switchTab('checklist')" id="tab-btn-checklist" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-white/70 text-slate-600 hover:bg-white">
+          <i data-lucide="check-square" class="w-4 h-4 text-[#6E9E47]"></i>
+          Checklist &amp; Timeline
+        </button>
+        <button onclick="switchTab('moodboard')" id="tab-btn-moodboard" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition bg-white/70 text-slate-600 hover:bg-white">
+          <i data-lucide="palette" class="w-4 h-4 text-[#F2B949]"></i>
+          Moodboard
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-6xl mx-auto px-4 pt-6">
+
+    <!-- ==================== 1. DASHBOARD TAB ==================== -->
+    <section id="pane-dashboard" class="tab-pane space-y-6">
+      <!-- Whimsical Sky-to-Meadow Hero Banner -->
+      <div class="sky-hero-gradient rounded-3xl p-6 md:p-8 shadow-lg border-2 border-white relative overflow-hidden">
+        <!-- Decorative SVG Clouds & Garden Flowers -->
+        <svg class="absolute top-3 right-6 w-32 h-16 text-white/60 pointer-events-none" viewBox="0 0 200 100" fill="currentColor">
+          <path d="M45,75 C25,75 15,60 22,45 C25,30 42,22 58,28 C68,12 95,10 112,24 C128,18 150,26 155,44 C172,46 182,62 172,75 Z"/>
+        </svg>
+        <svg class="absolute top-12 left-8 w-24 h-12 text-white/40 pointer-events-none" viewBox="0 0 200 100" fill="currentColor">
+          <path d="M45,75 C25,75 15,60 22,45 C25,30 42,22 58,28 C68,12 95,10 112,24 C128,18 150,26 155,44 C172,46 182,62 172,75 Z"/>
+        </svg>
+
+        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <!-- Left: Custom Cover Illustration / Photo -->
+          <div class="lg:col-span-4 flex flex-col items-center">
+            <div class="relative group w-48 h-56 sm:w-52 sm:h-60 rounded-3xl overflow-hidden border-4 border-white shadow-md bg-gradient-to-b from-[#62B4E8] via-[#B8E1F8] to-[#7DAE52]">
+              <img id="hero-cover-img" src="" alt="Foto Cover Pengantin" class="w-full h-full object-cover hidden" />
+              <!-- Default Whimsical Garden Couple SVG Illustration matching uploaded aesthetic -->
+              <div id="hero-default-svg" class="w-full h-full flex flex-col justify-between p-3 relative">
+                <div class="flex justify-between items-start">
+                  <span class="w-2 h-2 rounded-full bg-white/80"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-white/70"></span>
+                  <span class="w-2 h-2 rounded-full bg-white/80"></span>
+                </div>
+                <svg viewBox="0 0 200 210" class="w-full h-full">
+                  <!-- Soft Cloud -->
+                  <path d="M20,115 Q35,85 65,95 Q90,70 125,90 Q155,80 175,115 Z" fill="#FFFFFF" opacity="0.85"/>
+                  <!-- Meadow Hill -->
+                  <path d="M0,145 Q100,120 200,145 L200,210 L0,210 Z" fill="#6E9E47"/>
+                  <path d="M0,160 Q100,140 200,160 L200,210 L0,210 Z" fill="#8CB865"/>
+                  <!-- Groom & Bride Whimsical Silhouettes -->
+                  <g transform="translate(52, 58)">
+                    <!-- Groom -->
+                    <rect x="44" y="45" width="32" height="48" rx="14" fill="#FFFFFF"/>
+                    <circle cx="60" cy="30" r="16" fill="#FDE2D2"/>
+                    <path d="M44,26 Q60,10 76,26 Q72,16 60,18 Q48,16 44,26 Z" fill="#4A3B32"/>
+                    <!-- Bride -->
+                    <path d="M12,35 Q30,8 48,35 L54,88 L6,88 Z" fill="#FFFFFF"/>
+                    <path d="M12,35 Q30,8 48,35 Q45,55 48,75" fill="none" stroke="#F49AC1" stroke-width="2" stroke-dasharray="3,3"/>
+                    <circle cx="30" cy="34" r="14" fill="#FDE2D2"/>
+                    <!-- Blush -->
+                    <circle cx="23" cy="37" r="2.5" fill="#F49AC1"/>
+                    <circle cx="37" cy="37" r="2.5" fill="#F49AC1"/>
+                    <!-- Sarong Pastel -->
+                    <rect x="14" y="64" width="34" height="24" rx="6" fill="#F7D6E6"/>
+                  </g>
+                  <!-- Cute Cat -->
+                  <g transform="translate(124, 132)">
+                    <ellipse cx="14" cy="14" rx="10" ry="8" fill="#FFFFFF"/>
+                    <circle cx="14" cy="6" r="7" fill="#333333"/>
+                    <polygon points="8,2 10,-4 13,1" fill="#333333"/>
+                    <polygon points="20,2 18,-4 15,1" fill="#333333"/>
+                  </g>
+                  <!-- Poppy & Marigold Flowers -->
+                  <circle cx="28" cy="175" r="9" fill="#E86A7A"/>
+                  <circle cx="28" cy="175" r="3" fill="#F2B949"/>
+                  <circle cx="62" cy="186" r="8" fill="#F2B949"/>
+                  <circle cx="142" cy="182" r="10" fill="#E86A7A"/>
+                  <circle cx="142" cy="182" r="3.5" fill="#5D3A1A"/>
+                  <circle cx="174" cy="172" r="7" fill="#F49AC1"/>
+                  <circle cx="105" cy="190" r="6" fill="#62B4E8"/>
+                </svg>
+              </div>
+
+              <!-- Hover Upload Cover Button -->
+              <label class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white cursor-pointer text-xs font-semibold gap-1.5 p-3 text-center">
+                <i data-lucide="camera" class="w-6 h-6"></i>
+                <span>Ganti Foto Cover</span>
+                <input type="file" accept="image/*" class="hidden" onchange="uploadHeroCover(event)" />
+              </label>
+            </div>
+            <button id="reset-cover-btn" onclick="resetHeroCover()" class="hidden mt-2 text-xs text-slate-600 hover:text-[#E86A7A] underline">
+              Kembalikan ilustrasi bawaan
+            </button>
+          </div>
+
+          <!-- Right: Couple Names, Date & Live Countdown -->
+          <div class="lg:col-span-8 text-center lg:text-left space-y-4">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 text-[#3B8AC4] text-xs font-bold shadow-sm">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#F2B949]"></i>
+              <span>Menuju Hari Bahagia Kita</span>
+            </div>
+
+            <div>
+              <h2 id="hero-couple-names" onclick="openCoupleModal()" title="Klik untuk ubah nama pengantin" class="font-romantic text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 cursor-pointer hover:text-[#3B8AC4] transition inline-flex items-center gap-2">
+                Aisyah &amp; Raka
+              </h2>
+              <p id="hero-wedding-date-text" onclick="openCoupleModal()" class="text-slate-700 font-medium mt-1.5 flex items-center justify-center lg:justify-start gap-2 cursor-pointer hover:text-[#E86A7A] transition">
+                <i data-lucide="calendar-heart" class="w-4 h-4 text-[#E86A7A]"></i>
+                <span>Sabtu, 12 Desember 2026 • Pukul 08:00 WIB</span>
+              </p>
+              <p id="hero-venue-text" class="text-xs sm:text-sm text-slate-600 mt-1 flex items-center justify-center lg:justify-start gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#6E9E47]"></i>
+                <span>Taman Bunga Nusantara / Gedung Serbaguna</span>
+              </p>
+            </div>
+
+            <!-- Live Countdown Boxes -->
+            <div class="grid grid-cols-4 gap-2.5 sm:gap-4 max-w-lg mx-auto lg:mx-0 pt-2">
+              <div class="bg-white/90 backdrop-blur rounded-2xl p-3 sm:p-4 text-center shadow-sm border border-sky-100">
+                <span id="cd-days" class="block font-romantic text-2xl sm:text-4xl font-bold text-[#3B8AC4]">0</span>
+                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Hari</span>
+              </div>
+              <div class="bg-white/90 backdrop-blur rounded-2xl p-3 sm:p-4 text-center shadow-sm border border-sky-100">
+                <span id="cd-hours" class="block font-romantic text-2xl sm:text-4xl font-bold text-[#E86A7A]">0</span>
+                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Jam</span>
+              </div>
+              <div class="bg-white/90 backdrop-blur rounded-2xl p-3 sm:p-4 text-center shadow-sm border border-sky-100">
+                <span id="cd-minutes" class="block font-romantic text-2xl sm:text-4xl font-bold text-[#6E9E47]">0</span>
+                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Menit</span>
+              </div>
+              <div class="bg-white/90 backdrop-blur rounded-2xl p-3 sm:p-4 text-center shadow-sm border border-sky-100">
+                <span id="cd-seconds" class="block font-romantic text-2xl sm:text-4xl font-bold text-[#F2B949]">0</span>
+                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Detik</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 KPI Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Budget Card -->
+        <div onclick="switchTab('budget')" class="garden-card rounded-3xl p-5 cursor-pointer hover:-translate-y-1 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Anggaran</span>
+            <div class="w-9 h-9 rounded-2xl bg-rose-50 text-[#E86A7A] flex items-center justify-center">
+              <i data-lucide="wallet" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="dash-budget-total" class="text-xl font-bold text-slate-800">Rp 0</p>
+          <p id="dash-budget-sub" class="text-xs text-[#6E9E47] font-medium mt-1">Lunas: Rp 0</p>
+        </div>
+
+        <!-- Guests Card -->
+        <div onclick="switchTab('guests')" class="garden-card rounded-3xl p-5 cursor-pointer hover:-translate-y-1 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Daftar Tamu</span>
+            <div class="w-9 h-9 rounded-2xl bg-sky-50 text-[#3B8AC4] flex items-center justify-center">
+              <i data-lucide="users" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="dash-guest-total" class="text-xl font-bold text-slate-800">0 Tamu</p>
+          <p id="dash-guest-sub" class="text-xs text-[#3B8AC4] font-medium mt-1">0 Konfirmasi Hadir</p>
+        </div>
+
+        <!-- Checklist Card -->
+        <div onclick="switchTab('checklist')" class="garden-card rounded-3xl p-5 cursor-pointer hover:-translate-y-1 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Progres Persiapan</span>
+            <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-[#6E9E47] flex items-center justify-center">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="dash-task-percent" class="text-xl font-bold text-slate-800">0%</p>
+          <div class="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden">
+            <div id="dash-task-bar" class="bg-[#6E9E47] h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Moodboard Card -->
+        <div onclick="switchTab('moodboard')" class="garden-card rounded-3xl p-5 cursor-pointer hover:-translate-y-1 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Koleksi Moodboard</span>
+            <div class="w-9 h-9 rounded-2xl bg-amber-50 text-[#F2B949] flex items-center justify-center">
+              <i data-lucide="image" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="dash-mood-total" class="text-xl font-bold text-slate-800">0 Koleksi</p>
+          <p id="dash-mood-sub" class="text-xs text-slate-500 font-medium mt-1">0 Inspirasi tersimpan</p>
+        </div>
+      </div>
+
+      <!-- Shared Couple Love Notes -->
+      <div class="garden-card rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-romantic text-xl font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="heart" class="w-5 h-5 text-[#E86A7A] fill-[#E86A7A]"></i>
+            Catatan &amp; Pengingat Berdua
+          </h3>
+          <span class="text-xs text-slate-400">Tersimpan otomatis</span>
+        </div>
+        <textarea id="couple-notes" rows="3" oninput="saveNotes(this.value)" placeholder="Tulis pesan manis, pengingat jadwal fitting baju, atau hal penting untuk pasanganmu di sini..." class="w-full rounded-2xl border border-sky-100 bg-white/80 p-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#62B4E8]"></textarea>
+      </div>
+    </section>
+
+    <!-- ==================== 2. BUDGET CALCULATOR TAB ==================== -->
+    <section id="pane-budget" class="tab-pane hidden space-y-6">
+      <!-- Top Budget Summary & Add Category -->
+      <div class="garden-card rounded-3xl p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div>
+            <h2 class="font-romantic text-2xl font-bold text-slate-800">Budget Calculator Pernikahan</h2>
+            <p class="text-sm text-slate-500">Ubah judul tiap part/kategori kapan saja, tambah item, dan pantau status pembayaran.</p>
+          </div>
+          <button onclick="addBudgetCategory()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-[#E86A7A] hover:bg-[#d85869] text-white font-semibold text-sm shadow-sm transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            Tambah Part / Kategori Baru
+          </button>
+        </div>
+
+        <!-- Budget Totals Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
+          <div class="rounded-2xl bg-sky-50/80 p-4 border border-sky-100">
+            <span class="text-xs font-semibold text-[#3B8AC4] uppercase">Total Keseluruhan</span>
+            <p id="budget-grand-total" class="text-xl sm:text-2xl font-bold text-slate-800 mt-1">Rp 0</p>
+          </div>
+          <div class="rounded-2xl bg-emerald-50/80 p-4 border border-emerald-100">
+            <span class="text-xs font-semibold text-[#6E9E47] uppercase">Sudah Lunas</span>
+            <p id="budget-paid-total" class="text-xl sm:text-2xl font-bold text-[#6E9E47] mt-1">Rp 0</p>
+          </div>
+          <div class="rounded-2xl bg-amber-50/80 p-4 border border-amber-100">
+            <span class="text-xs font-semibold text-amber-600 uppercase">Sisa (Booking &amp; DP)</span>
+            <p id="budget-pending-total" class="text-xl sm:text-2xl font-bold text-amber-600 mt-1">Rp 0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Budget Categories Container -->
+      <div id="budget-categories-container" class="space-y-6"></div>
+    </section>
+
+    <!-- ==================== 3. GUEST LIST TAB ==================== -->
+    <section id="pane-guests" class="tab-pane hidden space-y-6">
+      <div class="garden-card rounded-3xl p-6 space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-romantic text-2xl font-bold text-slate-800">Guest List (Buku Tamu)</h2>
+            <p class="text-sm text-slate-500">Kelola daftar undangan cetak maupun digital serta pantau konfirmasi kehadiran.</p>
+          </div>
+          <!-- Mini Stats Pills -->
+          <div class="flex flex-wrap gap-2 text-xs font-semibold">
+            <span id="guest-stat-total" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700">Total: 0</span>
+            <span id="guest-stat-cetak" class="px-3 py-1.5 rounded-xl bg-sky-50 text-[#3B8AC4]">Cetak: 0</span>
+            <span id="guest-stat-digital" class="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-600">Digital: 0</span>
+            <span id="guest-stat-hadir" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-[#6E9E47]">Hadir: 0</span>
+            <span id="guest-stat-tidak" class="px-3 py-1.5 rounded-xl bg-rose-50 text-[#E86A7A]">Tidak: 0</span>
+          </div>
+        </div>
+
+        <!-- Quick Add Guest Form -->
+        <form onsubmit="addGuest(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-sky-50/60 p-4 rounded-2xl border border-sky-100">
+          <div class="sm:col-span-4">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nama Tamu</label>
+            <input type="text" id="new-guest-name" required placeholder="Contoh: Kel. Bpk. Hendra" class="w-full px-3.5 py-2 rounded-xl border border-sky-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#62B4E8]" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Undangan</label>
+            <select id="new-guest-type" class="w-full px-3 py-2 rounded-xl border border-sky-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#62B4E8]">
+              <option value="Digital">Digital</option>
+              <option value="Cetak">Cetak</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status</label>
+            <select id="new-guest-status" class="w-full px-3 py-2 rounded-xl border border-sky-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#62B4E8]">
+              <option value="Belum Diundang">Belum Diundang</option>
+              <option value="Sudah Diundang">Sudah Diundang</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3 flex items-end">
+            <button type="submit" class="w-full py-2 px-4 rounded-xl bg-[#3B8AC4] hover:bg-[#2f75a8] text-white font-semibold text-sm flex items-center justify-center gap-1.5 transition shadow-sm">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+              Tambah Tamu
+            </button>
+          </div>
+        </form>
+
+        <!-- Search & Filter Bar -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+            <input type="text" id="guest-search" oninput="renderGuests()" placeholder="Cari nama tamu..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#62B4E8]" />
+          </div>
+          <select id="guest-filter-type" onchange="renderGuests()" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-600">
+            <option value="ALL">Semua Undangan</option>
+            <option value="Cetak">Undangan Cetak</option>
+            <option value="Digital">Undangan Digital</option>
+          </select>
+          <select id="guest-filter-status" onchange="renderGuests()" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-600">
+            <option value="ALL">Semua Status</option>
+            <option value="Belum Diundang">Belum Diundang</option>
+            <option value="Sudah Diundang">Sudah Diundang</option>
+          </select>
+          <select id="guest-filter-rsvp" onchange="renderGuests()" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-600">
+            <option value="ALL">Semua Kehadiran</option>
+            <option value="Hadir">Hadir</option>
+            <option value="Tidak">Tidak</option>
+            <option value="Belum Konfirmasi">Belum Konfirmasi</option>
+          </select>
+        </div>
+
+        <!-- Simple Guest Table -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-sky-50/90 text-slate-700 text-xs uppercase tracking-wider border-b border-slate-200">
+                <th class="py-3.5 px-4 w-14 text-center">No</th>
+                <th class="py-3.5 px-4">Nama</th>
+                <th class="py-3.5 px-
